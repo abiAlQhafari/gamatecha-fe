@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/src/components/ui/button";
 import {
   Card,
   CardContent,
@@ -21,10 +20,12 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { authSchema } from "../schemas/auth";
 import { login } from "../services/login";
 import { useRouter } from "next/navigation";
+import { LoadingButton } from "./ui/loading-button";
 
 export function LoginForm() {
   const router = useRouter();
@@ -37,10 +38,12 @@ export function LoginForm() {
     },
   });
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      localStorage.setItem("token", data.data.accessToken);
+      localStorage.setItem("accessToken", data.data.accessToken);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
+      toast("Login successful", { duration: 2000 });
       router.push("/dashboard");
     },
   });
@@ -86,13 +89,15 @@ export function LoginForm() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="shadcn" {...field} />
+                      <Input type="password" placeholder="shadcn" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit">Submit</Button>
+              <LoadingButton className="mt-6" loading={isPending} type="submit">
+                Login
+              </LoadingButton>
             </form>
           </Form>
         </CardContent>

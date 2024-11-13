@@ -2,17 +2,19 @@
 
 import * as React from "react";
 import {
-  BookOpen,
-  Bot,
   Command,
   Frame,
+  Home,
   LifeBuoy,
   Map,
+  Pen,
   PieChart,
   Send,
-  Settings2,
   SquareTerminal,
+  User,
 } from "lucide-react";
+
+import logo from "../../public/assets/images/Horizontal Putih Merah 0-2.png";
 
 import { NavMain } from "@/src/components/nav-main";
 import { NavProjects } from "@/src/components/nav-projects";
@@ -27,6 +29,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/src/components/ui/sidebar";
+import { NavDashboard } from "./nav-dashboard";
+import Image from "next/image";
 
 const data = {
   user: {
@@ -34,89 +38,35 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
+  dashboard: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: Home,
+      isActive: true,
+    },
+  ],
   navMain: [
     {
-      title: "Playground",
+      title: "Menu Utama",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Artikel",
+          url: "/articles",
+          icon: Pen,
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Kategori",
+          url: "/categories",
+          icon: Command,
         },
         {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "User",
+          url: "/users",
+          icon: User,
         },
       ],
     },
@@ -160,19 +110,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
-                </div>
+                <Image src={logo} alt="Logo" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <NavDashboard items={data.dashboard} />
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
