@@ -26,6 +26,7 @@ import { authSchema } from "../schemas/auth";
 import { login } from "../services/login";
 import { useRouter } from "next/navigation";
 import { LoadingButton } from "./ui/loading-button";
+import { X } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
@@ -45,6 +46,13 @@ export function LoginForm() {
       localStorage.setItem("refreshToken", data.data.refreshToken);
       toast("Login successful", { duration: 2000 });
       router.push("/dashboard");
+    },
+    onError: () => {
+      toast("Login Gagal", {
+        duration: 2000,
+        className: "text-red-500",
+        icon: <X className="w-6 h-6" />,
+      });
     },
   });
 

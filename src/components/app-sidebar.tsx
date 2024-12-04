@@ -3,13 +3,9 @@
 import * as React from "react";
 import {
   Command,
-  Frame,
+  History,
   Home,
-  LifeBuoy,
-  Map,
   Pen,
-  PieChart,
-  Send,
   SquareTerminal,
   User,
 } from "lucide-react";
@@ -17,8 +13,7 @@ import {
 import logo from "../../public/assets/images/Horizontal Putih Merah 0-2.png";
 
 import { NavMain } from "@/src/components/nav-main";
-import { NavProjects } from "@/src/components/nav-projects";
-import { NavSecondary } from "@/src/components/nav-secondary";
+import { NavUtils } from "@/src/components/nav-projects";
 import { NavUser } from "@/src/components/nav-user";
 import {
   Sidebar,
@@ -36,7 +31,7 @@ const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "https://i.pravatar.cc/300",
   },
   dashboard: [
     {
@@ -71,33 +66,11 @@ const data = {
       ],
     },
   ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      name: "Riwayat Scraping",
+      url: "/riwayat-scraping",
+      icon: History,
     },
   ],
 };
@@ -119,8 +92,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavDashboard items={data.dashboard} />
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavUtils projects={data.projects} />
+        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
