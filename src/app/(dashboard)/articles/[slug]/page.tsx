@@ -2,7 +2,6 @@
 
 import { ArrowUpToLine, CheckCircle2 } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
-import { FaCircle } from "react-icons/fa";
 import {
   Card,
   CardFooter,
@@ -10,10 +9,10 @@ import {
   CardTitle,
 } from "../../../../components/ui/card";
 
-import { useForm } from "react-hook-form";
-import { articleSchema } from "../../../../schemas/article";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { request } from "@/src/lib/request";
+import { generateUrl } from "@/src/services/url";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import {
   Dialog,
@@ -23,54 +22,39 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { useState } from "react";
 import { LoadingButton } from "../../../../components/ui/loading-button";
-import { useQuery } from "@tanstack/react-query";
 import { fetchOneArticles } from "../../../../services/articles/fetchOneArticles";
-import { Form } from "../../../../components/ui/form";
 
 export default function DetailArticle() {
   const router = useRouter();
-  const params = useParams<{ tag: string; slug: string }>();
-  const { slug } = params;
+  const { slug } = useParams<{ slug: string }>();
+  const queryClient = useQueryClient();
 
-  const [loading, setLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  const { data, isError } = useQuery({
+  const { data, isError, isFetching } = useQuery({
     queryKey: ["articles", slug],
     queryFn: () => fetchOneArticles(slug),
   });
 
-  const form = useForm<z.infer<typeof articleSchema>>({
-    resolver: zodResolver(articleSchema),
-    defaultValues: {
-      title: data ? data.data.title : "Test",
-      content: data ? data.data.content : "",
-      mediaUrl: data ? data.data.mediaUrl : "",
-      categories: data ? [data.data.categories] : [],
+  const { mutate, isPending, isSuccess } = useMutation({
+    mutationFn: async (slug: string) => {
+      return request(generateUrl(`articles/${slug}`), {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: "PUBLISHED",
+        }),
+      });
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries();
+
+      setTimeout(() => {
+        router.push("/articles");
+      }, 2000);
     },
   });
 
   if (isError) {
     return <span>Error Accorded</span>;
-  }
-
-  function onSubmit(values: z.infer<typeof articleSchema>) {
-    console.log(values);
-
-    setLoading(true);
-
-    setTimeout(() => {
-      console.log(values);
-      setLoading(false);
-      setIsSuccess(true);
-    }, 3000);
-
-    setTimeout(() => {
-      router.push("/articles");
-    }, 3000);
   }
 
   return (
@@ -106,7 +90,7 @@ export default function DetailArticle() {
                 <div className="flex flex-col justify-between backdrop-blur h-2/5 p-2 sm:p-4">
                   <CardHeader className="p-0">
                     <div className="flex gap-3">
-                      {data?.data?.categories
+                      {/* {data?.data?.categories
                         ? data?.data?.categories.map((category: string) => (
                             <span
                               key={category}
@@ -116,7 +100,7 @@ export default function DetailArticle() {
                               {category}
                             </span>
                           ))
-                        : []}
+                        : []} */}
                     </div>
                   </CardHeader>
                   <CardTitle className="flex-1 text-xl sm:text-3xl">
@@ -138,7 +122,12 @@ export default function DetailArticle() {
                 {data?.data?.content
                   .split("\n")
                   .map((paragraph: string, index: number) => (
-                    <p key={index}>{paragraph}</p>
+                    <p
+                      key={index}
+                      dangerouslySetInnerHTML={{
+                        __html: `${paragraph}`,
+                      }}
+                    />
                   ))}
               </article>
             </div>
@@ -159,17 +148,13 @@ export default function DetailArticle() {
                   </DialogTitle>
                 </DialogHeader>
                 <DialogFooter className="sm:justify-start">
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                      <LoadingButton
-                        className="bg-green-500 rounded-sm text-white"
-                        loading={loading}
-                        type="submit"
-                      >
-                        Yakin
-                      </LoadingButton>
-                    </form>
-                  </Form>
+                  <LoadingButton
+                    className="bg-green-500 rounded-sm text-white"
+                    loading={isPending || isFetching}
+                    onClick={() => mutate(slug)}
+                  >
+                    Yakin
+                  </LoadingButton>
                   <DialogClose asChild>
                     <Button type="button" variant="secondary">
                       Tutup
