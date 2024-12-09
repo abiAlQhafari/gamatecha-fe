@@ -90,6 +90,7 @@ export default function DashboardArticles() {
               imageUrl={article.mediaUrl}
               author={{ name: "John Doe", avatar: "https://i.pravatar.cc/300" }}
               readTime={"5 min read"}
+              status={article.status}
             />
           </Link>
         ))}
