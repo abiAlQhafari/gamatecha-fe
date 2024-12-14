@@ -7,6 +7,10 @@ const nextConfig = {
         protocol: "https",
       },
       {
+        hostname: "gamatecha.sgp1.digitaloceanspaces.com",
+        protocol: "https",
+      },
+      {
         hostname: "*",
         protocol: "https",
       },

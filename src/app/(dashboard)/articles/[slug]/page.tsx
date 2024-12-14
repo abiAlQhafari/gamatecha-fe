@@ -1,8 +1,7 @@
 "use client";
 
-import { ArrowUpToLine, CheckCircle2 } from "lucide-react";
+import { ArrowUpToLine, CheckCircle2, Circle } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
-import { FaCircle } from "react-icons/fa";
 import {
   Card,
   CardFooter,
@@ -10,10 +9,10 @@ import {
   CardTitle,
 } from "../../../../components/ui/card";
 
-import { useForm } from "react-hook-form";
-import { articleSchema } from "../../../../schemas/article";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { request } from "@/src/lib/request";
+import { generateUrl } from "@/src/services/url";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import {
   Dialog,
@@ -23,88 +22,42 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { useEffect, useState } from "react";
 import { LoadingButton } from "../../../../components/ui/loading-button";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchOneArticles } from "../../../../services/articles/fetchOneArticles";
-import { Form } from "../../../../components/ui/form";
-import ContentRenderer from "../../../../components/content-renderer";
-import { SkeletonCard } from "../../../../components/skeleton-card";
-import { updateArticle } from "../../../../services/articles/updateArticle";
-import { toast } from "sonner";
+import { Category } from "../../../../types/category";
+import * as momentJs from "moment";
+import "moment/locale/id";
 
 export default function DetailArticle() {
   const router = useRouter();
-  const params = useParams<{ tag: string; slug: string }>();
-  const { slug } = params;
+  const { slug } = useParams<{ slug: string }>();
+  const queryClient = useQueryClient();
 
-  const [loading, setLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  const { data, isError, isLoading } = useQuery({
+  const { data, isError, isFetching } = useQuery({
     queryKey: ["articles", slug],
     queryFn: () => fetchOneArticles(slug),
   });
 
-  const form = useForm<Partial<z.infer<typeof articleSchema>>>({
-    resolver: zodResolver(articleSchema),
-    defaultValues: {
-      title: data ? data.data.title : "",
-      content: data ? data.data.content : "",
-      mediaUrl: data ? data.data.mediaUrl : "",
-      categories: data ? [data.data.categories] : [],
-      status: data?.data?.status === "PUBLISHED" ? "ARCHIVED" : "PUBLISHED",
-    },
-  });
-
-  const { mutate } = useMutation({
-    mutationKey: ["articles", data?.data.id],
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: number;
-      data: Partial<z.infer<typeof articleSchema>>;
-    }) => updateArticle(id, data),
-    onSuccess: () => {
-      setIsSuccess(true);
-      toast("Article Published", { duration: 2000 });
-      router.push("/articles");
-    },
-    onMutate: () => {
-      setLoading(true);
-    },
-    onError: () => {
-      toast("Gagal Membuat Article", {
-        duration: 2000,
+  const { mutate, isPending, isSuccess } = useMutation({
+    mutationFn: async (slug: string) => {
+      return request(generateUrl(`articles/${slug}`), {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: "PUBLISHED",
+        }),
       });
     },
-  });
+    onSuccess: async () => {
+      queryClient.invalidateQueries();
 
-  useEffect(() => {
-    if (data?.data) {
-      form.reset({
-        title: data.data.title,
-        content: data.data.content,
-        mediaUrl: data.data.mediaUrl,
-        categories: data.data.categories || [],
-        status: data.data.status === "PUBLISHED" ? "ARCHIVED" : "PUBLISHED",
-      });
-    }
-  }, [data, form]);
+      setTimeout(() => {
+        router.push("/articles");
+      }, 2000);
+    },
+  });
 
   if (isError) {
     return <span>Error Accorded</span>;
-  }
-
-  function onSubmit(values: Partial<z.infer<typeof articleSchema>>) {
-    console.log("Form values:", values);
-    if (!data?.data.id) {
-      console.error("Article ID not found!");
-      return;
-    }
-    mutate({ id: data.data.id, data: values });
   }
 
   return (
@@ -130,54 +83,59 @@ export default function DetailArticle() {
               </div>
             </div>
 
-            <div className="w-3/4 h-full">
-              {isLoading ? (
-                <SkeletonCard />
-              ) : (
-                <Card
-                  style={{
-                    backgroundImage: `url(${data?.data?.mediaUrl})`,
-                  }}
-                  className={`bg-cover bg-center h-2/5 flex flex-col justify-end`}
-                >
-                  <div className="flex flex-col justify-between backdrop-blur h-2/5 p-2 sm:p-4">
-                    <CardHeader className="p-0">
-                      <div className="flex gap-3">
-                        {data?.data?.categories
-                          ? data?.data?.categories.map((category: string) => (
-                              <span
-                                key={category}
-                                className="text-violet-600 text-sm bg-white/75 rounded-full px-1 py sm:px-2 sm:py-1"
-                              >
-                                <FaCircle className="h-4 w-4 inline-block mr-2" />
-                                {category}
-                              </span>
-                            ))
-                          : []}
-                      </div>
-                    </CardHeader>
-                    <CardTitle className="flex-1 text-xl sm:text-3xl">
-                      {data?.data?.title}
-                    </CardTitle>
-                    <CardFooter className="p-0 flex-1">
-                      <div>
-                        <span className="text-white">
-                          {data?.data?.publishedAt
-                            ? data?.data?.publishedAt
-                            : "19 Oktober 2024"}
-                        </span>
-                      </div>
-                    </CardFooter>
-                  </div>
-                </Card>
-              )}
+            <div className="w-full sm:w-3/4">
+              <Card
+                style={{
+                  backgroundImage: `url(${data?.data?.mediaUrl})`,
+                }}
+                className={`bg-cover bg-center h-1/4 sm:h-1/2 flex flex-col justify-end aspect-auto`}
+              >
+                <div className="flex flex-col justify-between backdrop-blur h-2/5 p-2 sm:p-4">
+                  <CardHeader className="p-0">
+                    <div className="flex gap-3">
+                      {data?.data?.categories
+                        ? data?.data?.categories.map((category: Category) => (
+                            <span
+                              key={category.id}
+                              className="text-violet-600 text-sm bg-white/75 rounded-full px-1 py sm:px-2 sm:py-1"
+                            >
+                              <Circle className="h-4 w-4 inline-block mr-2" />
+                              {category.name}
+                            </span>
+                          ))
+                        : []}
+                    </div>
+                  </CardHeader>
+                  <CardTitle className="text-xl sm:text-3xl">
+                    {data?.data?.title}
+                  </CardTitle>
+                  <CardFooter className="p-0 ">
+                    <div>
+                      <span className="text-white">
+                        {data?.data?.publishedAt
+                          ? momentJs
+                              .default(data?.data?.publishedAt)
+                              .format("dddd, MMMM Do YYYY")
+                          : momentJs
+                              .default(data?.data?.createdAt)
+                              .format("dddd, MMMM Do YYYY")}
+                      </span>
+                    </div>
+                  </CardFooter>
+                </div>
+              </Card>
 
               <article className="prose prose-lg sm:prose-xl max-w-none py-6 space-y-6">
-                {data?.data?.content ? (
-                  <ContentRenderer content={data?.data?.content} />
-                ) : (
-                  <></>
-                )}
+                {data?.data?.content
+                  .split("\n")
+                  .map((paragraph: string, index: number) => (
+                    <p
+                      key={index}
+                      dangerouslySetInnerHTML={{
+                        __html: `${paragraph}`,
+                      }}
+                    />
+                  ))}
               </article>
             </div>
           </div>
@@ -197,25 +155,13 @@ export default function DetailArticle() {
                   </DialogTitle>
                 </DialogHeader>
                 <DialogFooter className="sm:justify-start">
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                      <input type="hidden" {...form.register("status")} />
-                      <input type="hidden" {...form.register("title")} />
-                      <input type="hidden" {...form.register("content")} />
-                      <input type="hidden" {...form.register("mediaUrl")} />
-                      <input type="hidden" {...form.register("categories")} />
-                      <LoadingButton
-                        className="bg-green-500 rounded-sm text-white"
-                        loading={loading}
-                        onClick={() => {
-                          console.log(form.getValues());
-                          form.handleSubmit(onSubmit)();
-                        }}
-                      >
-                        Yakin
-                      </LoadingButton>
-                    </form>
-                  </Form>
+                  <LoadingButton
+                    className="bg-green-500 rounded-sm text-white"
+                    loading={isPending || isFetching}
+                    onClick={() => mutate(slug)}
+                  >
+                    Yakin
+                  </LoadingButton>
                   <DialogClose asChild>
                     <Button type="button" variant="secondary">
                       Tutup

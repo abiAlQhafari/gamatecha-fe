@@ -61,7 +61,7 @@ export default function DashboardArticles() {
                   <Link href={"/articles/tambah"}>Manual</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <span>Otomatis</span>
+                  <Link href={"/riwayat-scraping/tambah"}>Otomatis</Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>

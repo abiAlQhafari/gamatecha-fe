@@ -34,7 +34,9 @@ export function CardDemo({
           "cursor-pointer overflow-hidden relative card h-96 rounded-md shadow-xl max-w-full mx-auto flex flex-col justify-between p-4",
           `bg-cover`
         )}
-        style={{ backgroundImage: `url('${imageUrl}')` }}
+        style={{
+          backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent), url('${imageUrl}')`,
+        }}
       >
         <div className="absolute w-full h-full top-0 left-0 transition duration-300 group-hover/card:bg-black opacity-60"></div>
         <div className="flex flex-row w-full justify-between z-10">
@@ -53,17 +55,19 @@ export function CardDemo({
               <p className="text-sm text-gray-400">{readTime}</p>
             </div>
           </div>
-          <div>
-            <span
-              className={`text-white ${
-                status === ArticleStatus.ARCHIVED
-                  ? "bg-amber-500"
-                  : "bg-green-500"
-              } rounded-full px-2 py-1`}
-            >
-              {status}
-            </span>
-          </div>
+          {status ? (
+            <div>
+              <span
+                className={`text-white ${
+                  status === ArticleStatus.ARCHIVED
+                    ? "bg-amber-500"
+                    : "bg-green-500"
+                } rounded-full px-2 py-1`}
+              >
+                {status}
+              </span>
+            </div>
+          ) : null}
         </div>
         <div className="text content">
           <h1 className="font-bold text-xl md:text-2xl text-gray-50 relative z-10">

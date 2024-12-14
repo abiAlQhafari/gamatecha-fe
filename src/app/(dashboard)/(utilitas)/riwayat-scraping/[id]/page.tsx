@@ -67,7 +67,12 @@ export default function DetailRiwayatScraping() {
               // title={postInstagram.caption}
               description={postInstagram.caption.slice(0, 100)}
               imageUrl={postInstagram.thumbnailUrl}
-              author={{ name: "John Doe", avatar: "https://i.pravatar.cc/300" }}
+              author={{
+                name: `${data.data?.username}`,
+                avatar: data.data?.profilePic
+                  ? data.data?.profilePic
+                  : "https://i.pravatar.cc/300",
+              }}
               // readTime={"5 min read"}
             />
           </Link>
