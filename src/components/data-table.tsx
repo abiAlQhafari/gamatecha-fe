@@ -10,7 +10,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
+import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
   Table,
@@ -20,9 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Button } from "./ui/button";
-import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,6 +30,8 @@ interface DataTableProps<TData, TValue> {
   currentPage: number;
   totalPage: number;
   setPage: (page: number) => void;
+  setSearch: (search: string) => void;
+  search: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -38,6 +40,8 @@ export function DataTable<TData, TValue>({
   currentPage,
   totalPage,
   setPage,
+  search,
+  setSearch,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
 
@@ -62,10 +66,12 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Search"
-          value={(table.getColumn("")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("")?.setFilterValue(event.target.value)
-          }
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          // value={(table.getColumn("")?.getFilterValue() as string) ?? ""}
+          // onChange={(event) =>
+          //   table.getColumn("")?.setFilterValue(event.target.value)
+          // }
           className="max-w-sm bg-white border border-gray-200"
         />
         <Button
@@ -145,7 +151,7 @@ export function DataTable<TData, TValue>({
               return;
             }
           }}
-          disabled={currentPage > 1}
+          disabled={currentPage <= 1}
         >
           Previous
         </Button>
@@ -161,7 +167,7 @@ export function DataTable<TData, TValue>({
               return;
             }
           }}
-          disabled={currentPage < totalPage}
+          disabled={currentPage >= totalPage}
         >
           Next
         </Button>

@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { DataTable } from "../../../components/data-table";
 import { fetchCategories } from "../../../services/categories/fetchCategories";
 import { columns } from "./column";
-import { useState } from "react";
 
 export default function Categories() {
   const [page, setPage] = useState(1);
@@ -27,11 +27,13 @@ export default function Categories() {
       <h1 className="text-2xl font-bold mb-4">Kategori</h1>
       {isLoading && <span>Loading...</span>}
       <DataTable
+        search={search}
         columns={columns}
         data={data ? data.data : []}
         currentPage={data?.meta.page || 1}
         totalPage={data?.meta.totalPage || 1}
         setPage={setPage}
+        setSearch={setSearch}
       />
     </div>
   );
