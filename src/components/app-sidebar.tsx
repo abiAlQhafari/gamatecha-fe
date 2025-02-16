@@ -50,17 +50,17 @@ const data = {
       items: [
         {
           title: "Artikel",
-          url: "/articles",
+          url: "/dashboard/articles",
           icon: Pen,
         },
         {
           title: "Kategori",
-          url: "/categories",
+          url: "/dashboard/categories",
           icon: Command,
         },
         {
           title: "User",
-          url: "/users",
+          url: "/dashboard/users",
           icon: User,
         },
       ],
@@ -69,7 +69,7 @@ const data = {
   projects: [
     {
       name: "Riwayat Scraping",
-      url: "/riwayat-scraping",
+      url: "/dashboard/riwayat-scraping",
       icon: History,
     },
   ],
@@ -82,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="/dashboard">
                 <Image src={logo} alt="Logo" />
               </a>
             </SidebarMenuButton>

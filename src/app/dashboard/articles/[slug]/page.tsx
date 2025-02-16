@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpToLine, CheckCircle2 } from "lucide-react";
+import { ArrowUpToLine, CheckCircle2, Circle } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import {
   Card,
@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "../../../../components/ui/card";
 
-import { request } from "@/src/lib/request";
 import { generateUrl } from "@/src/services/url";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +23,10 @@ import {
 } from "../../../../components/ui/dialog";
 import { LoadingButton } from "../../../../components/ui/loading-button";
 import { fetchOneArticles } from "../../../../services/articles/fetchOneArticles";
+import { Category } from "../../../../types/category";
+import * as momentJs from "moment";
+import "moment/locale/id";
+import { request } from "../../../../services/api";
 
 export default function DetailArticle() {
   const router = useRouter();
@@ -40,6 +43,7 @@ export default function DetailArticle() {
       return request(generateUrl(`articles/${slug}`), {
         method: "PATCH",
         body: JSON.stringify({
+          ...data?.data,
           status: "PUBLISHED",
         }),
       });
@@ -48,7 +52,7 @@ export default function DetailArticle() {
       queryClient.invalidateQueries();
 
       setTimeout(() => {
-        router.push("/articles");
+        router.push("/dashboard/articles");
       }, 2000);
     },
   });
@@ -80,38 +84,43 @@ export default function DetailArticle() {
               </div>
             </div>
 
-            <div className="w-3/4">
+            <div className="w-full sm:w-3/4 h-full">
               <Card
                 style={{
                   backgroundImage: `url(${data?.data?.mediaUrl})`,
                 }}
-                className={`bg-cover bg-center h-3/4 flex flex-col justify-end`}
+                className={`bg-cover bg-center h-2/3 flex flex-col justify-end aspect-auto`}
               >
-                <div className="flex flex-col justify-between backdrop-blur h-2/5 p-2 sm:p-4">
+                <div className="basis-2/3 h-full"></div>
+                <div className="basis-1/3 flex flex-col justify-between backdrop-blur h-fit p-2 sm:p-4">
                   <CardHeader className="p-0">
                     <div className="flex gap-3">
-                      {/* {data?.data?.categories
-                        ? data?.data?.categories.map((category: string) => (
+                      {data?.data?.categories
+                        ? data?.data?.categories.map((category: Category) => (
                             <span
-                              key={category}
+                              key={category.id}
                               className="text-violet-600 text-sm bg-white/75 rounded-full px-1 py sm:px-2 sm:py-1"
                             >
-                              <FaCircle className="h-4 w-4 inline-block mr-2" />
-                              {category}
+                              <Circle className="h-4 w-4 inline-block mr-2" />
+                              {category.name}
                             </span>
                           ))
-                        : []} */}
+                        : []}
                     </div>
                   </CardHeader>
-                  <CardTitle className="flex-1 text-xl sm:text-3xl">
+                  <CardTitle className="text-xl sm:text-3xl">
                     {data?.data?.title}
                   </CardTitle>
-                  <CardFooter className="p-0 flex-1">
+                  <CardFooter className="p-0 ">
                     <div>
                       <span className="text-white">
                         {data?.data?.publishedAt
-                          ? data?.data?.publishedAt
-                          : "19 Oktober 2024"}
+                          ? momentJs
+                              .default(data?.data?.publishedAt)
+                              .format("dddd, MMMM Do YYYY")
+                          : momentJs
+                              .default(data?.data?.createdAt)
+                              .format("dddd, MMMM Do YYYY")}
                       </span>
                     </div>
                   </CardFooter>

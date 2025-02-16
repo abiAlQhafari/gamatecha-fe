@@ -26,12 +26,8 @@ export const columns: ColumnDef<UserInstagram>[] = [
     },
   },
   {
-    accessorKey: "jumlahPostingan",
+    accessorKey: "totalPost",
     header: "Jumlah Postingan",
-  },
-  {
-    accessorKey: "jumlahTelahPublish",
-    header: "Jumlah Telah Publish",
   },
   {
     accessorKey: "action",
@@ -39,7 +35,7 @@ export const columns: ColumnDef<UserInstagram>[] = [
     cell: ({ row }) => {
       const userInstagram = row.original;
       return (
-        <Link href={`/riwayat-scraping/${userInstagram.id}`}>
+        <Link href={`/dashboard/riwayat-scraping/${userInstagram.id}`}>
           <Button variant={"secondary"}>
             <Eye />
             View

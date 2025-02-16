@@ -1,5 +1,5 @@
-import { request } from "../../lib/request";
 import { User } from "../../types/user";
+import { request } from "../api";
 import { generateUrl } from "../url";
 
 export const fetchUsers = async (): Promise<{

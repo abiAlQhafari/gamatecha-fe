@@ -3,26 +3,39 @@ import * as React from "react";
 import Dropzone from "shadcn-dropzone";
 import { cn } from "../../lib/utils";
 import Image from "next/image";
+import { useMutation } from "@tanstack/react-query";
+import { UploadFile } from "../../services/upload/uploadFile";
+import { toast } from "sonner";
+import { X } from "lucide-react";
+import { SkeletonCard } from "../skeleton-card";
 
 const InputFile = React.forwardRef<
   HTMLInputElement,
-  React.ComponentProps<"input">
+  React.ComponentProps<"input"> & { onChange?: (value: string) => void }
 >(({ className, ...props }, ref) => {
   const [previews, setPreviews] = React.useState<string[]>([]);
 
-  const handleDrop = (acceptedFiles: File[]) => {
-    // Membuat preview untuk setiap file
-    const newPreviews = acceptedFiles.map((file) => {
-      // Membaca file sebagai URL
-      return URL.createObjectURL(file);
-    });
-
-    setPreviews((prev) => [...prev, ...newPreviews]);
-
-    acceptedFiles.forEach((file) => {
-      if (ref && "current" in ref && ref.current) {
-        ref.current.value = file.name;
+  const { mutate, isPending } = useMutation({
+    mutationFn: UploadFile,
+    onSuccess: (data) => {
+      if (props.onChange) {
+        props.onChange(data?.data?.url);
       }
+
+      setPreviews((prev) => [...prev, data?.data?.url]);
+    },
+    onError: () => {
+      toast("Gagal Membuat Article", {
+        duration: 2000,
+        className: "text-red-500",
+        icon: <X className="w-6 h-6" />,
+      });
+    },
+  });
+
+  const handleDrop = (acceptedFiles: File[]) => {
+    acceptedFiles.forEach((file) => {
+      mutate(file);
     });
   };
 
@@ -37,6 +50,7 @@ const InputFile = React.forwardRef<
         dropZoneClassName="border-none"
         onDrop={handleDrop}
       ></Dropzone>
+      {isPending ? <SkeletonCard /> : null}
       <div className="mt-4">
         {previews.map((src, index) => (
           <div key={index} className="relative">

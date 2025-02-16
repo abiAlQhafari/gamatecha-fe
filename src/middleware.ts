@@ -1,36 +1,41 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { auth } from "./lib/auth";
 
-export async function middleware(request: NextRequest) {
-  // const accessToken = request.get("accessToken")?.value;
-  // if (!accessToken) {
-  //   // Jika token tidak ada, redirect ke halaman login
-  //   return NextResponse.redirect(new URL("/login", request.url));
-  // }
-  // try {
-  //   // Verifikasi token dengan Backend
-  //   const verifyResponse = await fetch(
-  //     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/validate`,
-  //     {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //     }
-  //   );
-  //   if (!verifyResponse.ok) {
-  //     // Jika verifikasi gagal, redirect ke login
-  //     return NextResponse.redirect(new URL("/login", request.url));
-  //   }
-  // } catch {
-  //   // Jika terjadi error (misalnya Backend tidak dapat diakses), redirect ke login
-  //   return NextResponse.redirect(new URL("/login", request.url));
-  // }
-  // // Jika token valid, lanjutkan ke halaman yang diminta
-  // return NextResponse.next();
-}
+export default auth((req) => {
+  const currentPathname = req.nextUrl.pathname;
+  const authorizedFallbackUrl = process.env.FALLBACK_AUTHORIZED_URL_PATH;
+  const unauthorizedFallbackUrl = process.env.FALLBACK_UNAUTHORIZED_URL_PATH;
 
-// Konfigurasi path yang dipantau middleware
+  const pathsRequiringAuth = [authorizedFallbackUrl];
+  const pathsRequiringNoAuth = [unauthorizedFallbackUrl];
+
+  if (
+    pathsRequiringAuth.some((path) => currentPathname.startsWith(path)) &&
+    !req.auth
+  ) {
+    return NextResponse.redirect(new URL(unauthorizedFallbackUrl, req.url));
+  }
+
+  if (
+    pathsRequiringNoAuth.some((path) => currentPathname.startsWith(path)) &&
+    req.auth
+  ) {
+    return NextResponse.redirect(new URL(authorizedFallbackUrl, req.url));
+  }
+
+  return NextResponse.next();
+});
+
+/**
+ * The config object is optional and can be exported as seen below.
+ * It allows you to configure the middleware.
+ * In this case, middleware will be executed for every request that does not match the following paths:
+ * - /api/*
+ * - /_next/static/*
+ * - /_next/image/*
+ * - /favicon.ico
+ * Reference: https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
+ */
 export const config = {
-  matcher: "/dashboard/:path*", // Middleware hanya berlaku untuk path tertentu
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
