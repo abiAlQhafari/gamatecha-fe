@@ -4,6 +4,10 @@ import { ChevronDown, Filter } from "lucide-react";
 import { CardDemo } from "../../../components/article-card";
 import { Input } from "../../../components/ui/input";
 
+import { LoadingButton } from "@/src/components/ui/loading-button";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { SkeletonCard } from "../../../components/skeleton-card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,21 +15,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { fetchArticles } from "../../../services/articles/fetchArticles";
 import { Article } from "../../../types/article";
-import { SkeletonCard } from "../../../components/skeleton-card";
 
 export default function DashboardArticles() {
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["articles"],
-    queryFn: fetchArticles,
-  });
+  // const { data, isLoading, isError, error } = useQuery({
+  //   queryKey: ["articles"],
+  //   queryFn: fetchArticles,
+  // });
 
-  if (isError) {
-    return <span>Error: {error.message}</span>;
-  }
+  const { isFetching, data, isFetchingNextPage, fetchNextPage } =
+    useInfiniteQuery({
+      initialPageParam: 1,
+      queryKey: ["articles-paginated"],
+      queryFn: ({ pageParam }) => fetchArticles(pageParam),
+      getNextPageParam: (lastPage) =>
+        lastPage.meta.page < lastPage.meta.totalPage
+          ? lastPage.meta.page + 1
+          : undefined,
+    });
 
   return (
     <div className="">
@@ -73,7 +81,31 @@ export default function DashboardArticles() {
 
       {/* List of articles */}
 
-      {isLoading ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* {data?.data?.length === 0 ? <span>No articles found</span> : null} */}
+        {data?.pages
+          .flatMap((page) => page.data)
+          ?.map((article: Article) => (
+            <Link
+              key={article.slug}
+              href={`/dashboard/articles/${article.slug}`}
+            >
+              <CardDemo
+                title={`${article.title.slice(0, 50)}...`}
+                description={`${article.content.slice(0, 100)}...`}
+                imageUrl={article.mediaUrl}
+                author={{
+                  name: "John Doe",
+                  avatar: "https://i.pravatar.cc/300",
+                }}
+                readTime={"5 min read"}
+                status={article.status}
+              />
+            </Link>
+          ))}
+      </div>
+
+      {isFetching || isFetchingNextPage ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <SkeletonCard />
           <SkeletonCard />
@@ -82,21 +114,18 @@ export default function DashboardArticles() {
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        {data?.data?.length === 0 ? <span>No articles found</span> : null}
-        {data?.data?.map((article: Article) => (
-          <Link key={article.slug} href={`/dashboard/articles/${article.slug}`}>
-            <CardDemo
-              title={`${article.title.slice(0, 50)}...`}
-              description={`${article.content.slice(0, 100)}...`}
-              imageUrl={article.mediaUrl}
-              author={{ name: "John Doe", avatar: "https://i.pravatar.cc/300" }}
-              readTime={"5 min read"}
-              status={article.status}
-            />
-          </Link>
-        ))}
-      </div>
+      {data && (
+        <div className="w-full flex justify-center mt-8">
+          <LoadingButton
+            loading={isFetchingNextPage}
+            onClick={() => {
+              fetchNextPage();
+            }}
+          >
+            Tampilkan Lebih Banyak
+          </LoadingButton>
+        </div>
+      )}
     </div>
   );
 }
