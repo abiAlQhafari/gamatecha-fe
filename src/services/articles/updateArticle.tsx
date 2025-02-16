@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { articleSchema } from "../../schemas/article";
-import { request } from "../../lib/request";
 import { generateUrl } from "../url";
+import { request } from "../api";
 
 export const updateArticle = async (
   id: number,

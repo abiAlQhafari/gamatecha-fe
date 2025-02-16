@@ -1,9 +1,7 @@
-import { request } from "../../lib/request";
+import { request } from "../api";
 import { generateUrl } from "../url";
 
 export const UploadFile = async (file: File) => {
-  console.log(file);
-
   const body = new FormData();
   body.append("file", file);
 

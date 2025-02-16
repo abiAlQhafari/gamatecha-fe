@@ -7,13 +7,17 @@ import { Button } from "../../../components/ui/button";
 import { Category } from "../../../types/category";
 
 export const columns: ColumnDef<Category>[] = [
-  // {
-  //   accessorKey: "id",
-  //   header: "ID",
-  // },
+  {
+    accessorKey: "id",
+    header: "ID",
+  },
   {
     accessorKey: "name",
     header: "Name",
+  },
+  {
+    accessorKey: "totalPost",
+    header: "Postingan",
   },
   {
     accessorKey: "action",
@@ -21,7 +25,7 @@ export const columns: ColumnDef<Category>[] = [
     cell: ({ row }) => {
       const kategori = row.original;
       return (
-        <Link href={`/categories/${kategori.id}`}>
+        <Link href={`/dashboard/categories/${kategori.id}`}>
           <Button variant={"secondary"}>
             <Eye />
             View

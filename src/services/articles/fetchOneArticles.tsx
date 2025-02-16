@@ -1,5 +1,5 @@
-import { request } from "../../lib/request";
 import { Article } from "../../types/article";
+import { request } from "../api";
 import { generateUrl } from "../url";
 
 export const fetchOneArticles = async (

@@ -53,7 +53,7 @@ export function ArticleForm() {
     mutationFn: createArticle,
     onSuccess: () => {
       toast("Create Article successful", { duration: 2000 });
-      router.push("/articles");
+      router.push("/dashboard/articles");
     },
     onError: () => {
       toast("Gagal Membuat Article", {
@@ -65,7 +65,6 @@ export function ArticleForm() {
   });
 
   function onSubmit(values: z.infer<typeof articleSchema>) {
-    console.log("Form values:", values);
     mutate(values);
   }
 

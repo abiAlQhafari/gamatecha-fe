@@ -34,7 +34,7 @@ export default function TambahRiwayatScraping() {
     mutationFn: createUserInstagram,
     onSuccess: () => {
       toast("Berhasil Scraping User", { duration: 2000 });
-      router.push("/riwayat-scraping");
+      router.push("/dashboard/riwayat-scraping");
     },
     onError: () => {
       toast("Gagal Scraping User", {

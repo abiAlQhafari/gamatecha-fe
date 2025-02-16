@@ -21,16 +21,26 @@ import {
   TableRow,
 } from "./ui/table";
 import { Button } from "./ui/button";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  currentPage: number;
+  totalPage: number;
+  setPage: (page: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  currentPage,
+  totalPage,
+  setPage,
 }: DataTableProps<TData, TValue>) {
+  const router = useRouter();
+
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -49,7 +59,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="rounded-md bg-white p-4">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Search"
           value={(table.getColumn("")?.getFilterValue() as string) ?? ""}
@@ -58,6 +68,16 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm bg-white border border-gray-200"
         />
+        <Button
+          onClick={() => {
+            const currentPath = window.location.pathname;
+            router.push(`${currentPath}/tambah`);
+          }}
+          variant="secondary"
+        >
+          <Plus size={24} />
+          Tambah
+        </Button>
       </div>
       <div className="rounded-md border border-gray-200">
         <Table>
@@ -118,16 +138,30 @@ export function DataTable<TData, TValue>({
         <Button
           variant={"secondary"}
           size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
+          onClick={() => {
+            if (currentPage > 1) {
+              setPage(currentPage - 1);
+            } else {
+              return;
+            }
+          }}
+          disabled={currentPage > 1}
         >
           Previous
         </Button>
         <Button
           variant={"secondary"}
           size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
+          onClick={() => {
+            console.log(currentPage, totalPage);
+
+            if (currentPage < totalPage) {
+              setPage(currentPage + 1);
+            } else {
+              return;
+            }
+          }}
+          disabled={currentPage < totalPage}
         >
           Next
         </Button>

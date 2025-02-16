@@ -1,4 +1,4 @@
-import { request } from "../../lib/request";
+import { request } from "../api";
 import { generateUrl } from "../url";
 
 export const fetchOneUserInstagram = async (id?: number) => {

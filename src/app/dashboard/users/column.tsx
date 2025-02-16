@@ -29,7 +29,7 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original;
       return (
-        <Link href={`/users/${user.id}`}>
+        <Link href={`/dashboard/users/${user.id}`}>
           <Button variant={"secondary"}>
             <Eye />
             View

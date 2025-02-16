@@ -1,17 +1,21 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
 import { fetchPostInstagram } from "../../../../../services/post-instagrams/fetchPostInstagram";
 import { Input } from "../../../../../components/ui/input";
 import { Filter } from "lucide-react";
-import Link from "next/link";
 import { SkeletonCard } from "../../../../../components/skeleton-card";
 import { PostInstagram } from "../../../../../types/post-instagram";
 import { CardDemo } from "../../../../../components/article-card";
+import { generateUrl } from "../../../../../services/url";
+import { toast } from "sonner";
+import { Dialog, DialogContent } from "../../../../../components/ui/dialog";
+import { Spinner } from "../../../../../components/ui/spinner";
+import { request } from "../../../../../services/api";
 
 export default function DetailRiwayatScraping() {
-  // const router = useRouter();
+  const router = useRouter();
   const params = useParams<{ id: string }>();
   const { id } = params;
 
@@ -19,6 +23,29 @@ export default function DetailRiwayatScraping() {
     queryKey: ["user-instagram", id],
     queryFn: () => fetchPostInstagram(parseInt(id, 10)),
   });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: (id: number) => {
+      return request(generateUrl(`post-instagram/${id}/convert-to-article`), {
+        method: "GET",
+      });
+    },
+    onSuccess: () => {
+      setTimeout(() => {
+        router.push("/dashboard/articles");
+      }, 2000);
+    },
+    onError: () => {
+      toast("Gagal Scraping User", {
+        duration: 2000,
+        className: "bg-red-500 text-white",
+      });
+    },
+  });
+
+  const scrapeOne = (id: number) => {
+    mutate(id);
+  };
 
   return (
     <div>
@@ -62,9 +89,11 @@ export default function DetailRiwayatScraping() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {data?.data?.length === 0 ? <span>No articles found</span> : null}
         {data?.data?.postInstagram.map((postInstagram: PostInstagram) => (
-          <Link key={postInstagram.id} href={`/articles/${postInstagram.id}`}>
+          <div
+            key={postInstagram.id}
+            onClick={() => scrapeOne(postInstagram.id)}
+          >
             <CardDemo
-              // title={postInstagram.caption}
               description={postInstagram.caption.slice(0, 100)}
               imageUrl={postInstagram.thumbnailUrl}
               author={{
@@ -73,11 +102,18 @@ export default function DetailRiwayatScraping() {
                   ? data.data?.profilePic
                   : "https://i.pravatar.cc/300",
               }}
-              // readTime={"5 min read"}
             />
-          </Link>
+          </div>
         ))}
       </div>
+      {isPending ? (
+        <Dialog open={isPending}>
+          <DialogContent className="flex gap-4 items-center">
+            <Spinner size={"large"} />
+            <span>Sedang Konversi Data</span>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </div>
   );
 }

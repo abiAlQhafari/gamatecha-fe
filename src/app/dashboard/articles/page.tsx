@@ -58,10 +58,12 @@ export default function DashboardArticles() {
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
-                  <Link href={"/articles/tambah"}>Manual</Link>
+                  <Link href={"/dashboard/articles/tambah"}>Manual</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Link href={"/riwayat-scraping/tambah"}>Otomatis</Link>
+                  <Link href={"/dashboard/riwayat-scraping/tambah"}>
+                    Otomatis
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -83,10 +85,10 @@ export default function DashboardArticles() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {data?.data?.length === 0 ? <span>No articles found</span> : null}
         {data?.data?.map((article: Article) => (
-          <Link key={article.slug} href={`/articles/${article.slug}`}>
+          <Link key={article.slug} href={`/dashboard/articles/${article.slug}`}>
             <CardDemo
-              title={article.title}
-              description={article.content.slice(0, 100)}
+              title={`${article.title.slice(0, 50)}...`}
+              description={`${article.content.slice(0, 100)}...`}
               imageUrl={article.mediaUrl}
               author={{ name: "John Doe", avatar: "https://i.pravatar.cc/300" }}
               readTime={"5 min read"}

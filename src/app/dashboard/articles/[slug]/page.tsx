@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "../../../../components/ui/card";
 
-import { request } from "@/src/lib/request";
 import { generateUrl } from "@/src/services/url";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,6 +26,7 @@ import { fetchOneArticles } from "../../../../services/articles/fetchOneArticles
 import { Category } from "../../../../types/category";
 import * as momentJs from "moment";
 import "moment/locale/id";
+import { request } from "../../../../services/api";
 
 export default function DetailArticle() {
   const router = useRouter();
@@ -43,6 +43,7 @@ export default function DetailArticle() {
       return request(generateUrl(`articles/${slug}`), {
         method: "PATCH",
         body: JSON.stringify({
+          ...data?.data,
           status: "PUBLISHED",
         }),
       });
@@ -51,7 +52,7 @@ export default function DetailArticle() {
       queryClient.invalidateQueries();
 
       setTimeout(() => {
-        router.push("/articles");
+        router.push("/dashboard/articles");
       }, 2000);
     },
   });
@@ -83,14 +84,15 @@ export default function DetailArticle() {
               </div>
             </div>
 
-            <div className="w-full sm:w-3/4">
+            <div className="w-full sm:w-3/4 h-full">
               <Card
                 style={{
                   backgroundImage: `url(${data?.data?.mediaUrl})`,
                 }}
-                className={`bg-cover bg-center h-1/4 sm:h-1/2 flex flex-col justify-end aspect-auto`}
+                className={`bg-cover bg-center h-2/3 flex flex-col justify-end aspect-auto`}
               >
-                <div className="flex flex-col justify-between backdrop-blur h-2/5 p-2 sm:p-4">
+                <div className="basis-2/3 h-full"></div>
+                <div className="basis-1/3 flex flex-col justify-between backdrop-blur h-fit p-2 sm:p-4">
                   <CardHeader className="p-0">
                     <div className="flex gap-3">
                       {data?.data?.categories
