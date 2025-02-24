@@ -5,6 +5,10 @@ import { StatCard } from "../../components/ui/stat-card";
 import { fetchTotalArticle } from "../../services/dashboard/fetchTotalArticle";
 import { fetchTotalUserInstagram } from "../../services/dashboard/fetchTotalUserInstagram";
 import { ChartArticleViews } from "../../components/chart";
+import {
+  fetchTotalPostInstagram,
+  fetchTotalPostInstagramt,
+} from "../../services/dashboard/fetchTotalPostInstagram";
 
 export default function DashboardHomePage() {
   return (
@@ -13,6 +17,7 @@ export default function DashboardHomePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ArticleStats />
         <UserInstagramStats />
+        <PostInstagramStats />
       </div>
       <div className="mt-6">
         <ChartArticleViews />
@@ -39,4 +44,13 @@ function UserInstagramStats() {
   });
 
   return <StatCard title="Total User Instagram" count={data?.data} />;
+}
+
+function PostInstagramStats() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["total-post-instagram"],
+    queryFn: () => fetchTotalPostInstagram(),
+  });
+
+  return <StatCard title="Total Post Instagram" count={data?.data} />;
 }
